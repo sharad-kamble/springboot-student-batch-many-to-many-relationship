@@ -1,10 +1,21 @@
 # 📚 Student-Batch Enrollment API
 
-This project demonstrates a **Many-to-Many relationship** between `Student` and `Batch` entities using **Spring Boot**, **Spring Data JPA**, and **PostgresSQL**.
+This project demonstrates a **Many-to-Many relationship** between `Student` and `Batch` entities using **Spring Boot**, **Spring Data JPA**, and **PostgreSQL/MySQL**.  
+It allows you to manage students, batches, and enrollments between them.
 
 ---
 
-## 📂 Table Structure
+## ✨ Features
+- Add students  
+- Add batches  
+- Enroll a student into one or multiple batches  
+- Retrieve all students with their batches  
+- Retrieve all batches with their enrolled students  
+- Uses **Hibernate Many-to-Many mapping** with a join table
+
+---
+
+## 📂 Database Structure
 
 ### **Student_info Table**
 | Column Name | Data Type | Description |
@@ -33,7 +44,7 @@ This project demonstrates a **Many-to-Many relationship** between `Student` and 
 
 ### **1️⃣ Add a Student**
 ```http
-POST /students
+POST /student
 Content-Type: application/json
 ```
 #### Request Body:
@@ -43,13 +54,16 @@ Content-Type: application/json
     "address": "Pune"
 }
 ```
-
+#### Response:
+```
+student added
+```
 
 ---
 
 ### **2️⃣ Add a Batch**
 ```http
-POST /batches
+POST /batch
 Content-Type: application/json
 ```
 #### Request Body:
@@ -60,7 +74,10 @@ Content-Type: application/json
     "fees": 15000
 }
 ```
-
+#### Response:
+```
+batch added
+```
 
 ---
 
@@ -83,7 +100,7 @@ Student Enrolled
 ```http
 GET /students
 ```
-#### Response:
+#### Example Response:
 ```json
 [
     {
@@ -108,7 +125,7 @@ GET /students
 ```http
 GET /batches
 ```
-#### Response:
+#### Example Response:
 ```json
 [
     {
@@ -129,43 +146,80 @@ GET /batches
 
 ---
 
+## 📊 Entity Relationship Diagram (ERD)
+```
+Student_info           batch_student            Batch
+------------           -------------            -----
+id (PK)   <---------+  student_id (FK)  +-----> id (PK)
+name                  batch_id (FK)     <-----  name
+address                                      duration
+                                             fees
+```
+
+---
+
+## ⚠️ Error Handling
+- If an invalid `student_id` or `batch_id` is passed, the application will throw a **NoSuchElementException**.
+- Recommended improvement: replace `.get()` with `.orElseThrow()` and return proper HTTP status codes.
+
+---
+
+## 📂 Folder Structure
+```
+src/main/java/com/example/demo
+│
+├── controller
+│   ├── BatchController.java
+│   ├── EnrollController.java
+│   └── StudentController.java
+│
+├── controller/service
+│   ├── BatchService.java
+│   ├── BatchServiceImpl.java
+│   ├── EnrollmentService.java
+│   ├── EnrollmentServiceImpl.java
+│   ├── StudentService.java
+│   └── StudentServiceImpl.java
+│
+├── entity
+│   ├── Batch.java
+│   └── Student.java
+│
+└── repository
+    ├── BatchRepository.java
+    └── StudentRepository.java
+```
+
+---
+
 ## 🛠 Tech Stack
 - **Java 17**
 - **Spring Boot 3**
 - **Spring Data JPA**
 - **Hibernate**
-- **Postgress**
+- **PostgreSQL/MySQL**
 - **Maven**
 
 ---
 
-## ⚙️ How to Run
+## 🚀 How to Run
 1. Clone the repository  
    ```bash
-   git clone https://github.com/your-username/your-repo.git
+   git clone https://github.com/your-username/student-batch-enrollment.git
    ```
-2. Create a MySQL database:  
+2. Create the database:
    ```sql
    CREATE DATABASE student_batch_db;
    ```
 3. Update `application.properties`:
    ```properties
-   spring.datasource.url=jdbc:mysql://localhost:3306/student_batch_db
-   spring.datasource.username=root
+   spring.datasource.url=jdbc:postgresql://localhost:5432/student_batch_db
+   spring.datasource.username=postgres
    spring.datasource.password=yourpassword
    spring.jpa.hibernate.ddl-auto=update
    spring.jpa.show-sql=true
    ```
-4. Run the application:  
+4. Run the application:
    ```bash
    mvn spring-boot:run
    ```
-
----
-
-## 📌 Notes
-- **Owning Side:** `Student` entity owns the relationship (`@JoinTable` in `Student`).
-- **Inverse Side:** `Batch` entity uses `mappedBy = "batches"`.
-- Use `studentRepo.save(student)` to insert into the join table.
-
----
